@@ -1,27 +1,37 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from .forms import TransactionForm
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
 
+from .forms import TransactionForm, CardForm, BudgetForm
 
-def index(request):
-    # if this is a POST request we need to process the form data
+def login(request):
+    return auth_views.LoginView.as_view()
+
+def logout(request):
+    return auth_views.LogoutView.as_view()
+
+def render_form(request, form_model, redirect_response, form_url, title):
     if request.method == "POST":
-        # create a form instance and populate it with data from the request:
-        form = TransactionForm(request.POST)
-        # check whether it's valid:
+        form = form_model(request.POST)
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
+            form.save(commit=False)
             form.instance.user = request.user
             form.save()
-            return HttpResponseRedirect("/form-sent/")
-
-    # if a GET (or any other method) we'll create a blank form
+            return HttpResponseRedirect(redirect_response)
     else:
-        form = TransactionForm()
+        form = form_model()
+    
+    return render(request, "base_form.html", {"form": form, "form_url": form_url, "title": title})
 
-    return render(request, "transaction.html", {"form": form})
+@login_required()
+def create_transaction(request):
+    return render_form(request, TransactionForm, "/", "create", "Create Transaction")
 
-def form_sent(request):
-    return HttpResponse("Your form was sent!")
+@login_required()
+def create_card(request):
+    return render_form(request, CardForm, "/", "create", "Create Card")
+
+@login_required()
+def create_budget(request):
+    return render_form(request, BudgetForm, "/", "create", "Create Budget")

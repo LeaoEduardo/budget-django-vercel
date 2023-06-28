@@ -1,16 +1,33 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% load static %} 
 
 {% block content %}
-{% if user.is_authenticated %}
-  Hi {{ user.username }}!
-  <p><a href="{% url 'create_transaction' %}">Create transaction</a></p>
-  <p><a href="{% url 'create_card' %}">Create card</a></p>
-  <p><a href="{% url 'create_budget' %}">Create budget</a></p>
-  <p><a href="{% url 'logout' %}">Log Out</a></p>
-{% else %}
-  <p>You are not logged in</p>
-  <a href="{% url 'login' %}">Log In</a>
-{% endif %}
+<p>Hi {{ user.username }}!</p>
+<h2>Dashboard</h2>
+<div class="grid-container">
+  <div class="grid-item">
+    <canvas id="chart1"></canvas>
+  </div>
+  <div class="grid-item">
+    <canvas id="chart2"></canvas>
+  </div>
+  <div class="grid-item">
+    <canvas id="chart3"></canvas>
+  </div>
+  <div class="grid-item">
+    <canvas id="chart4"></canvas>
+  </div>
+  <div class="grid-item">
+    <canvas id="chart5"></canvas>
+  </div>
+  <div class="grid-item">
+    <canvas id="chart6"></canvas>
+  </div>
+</div>
+<p><a href="{% url 'create_transaction' %}">Create transaction</a></p>
+<p><a href="{% url 'create_card' %}">Create card</a></p>
+<p><a href="{% url 'create_budget' %}">Create budget</a></p>
+<p><a href="{% url 'logout' %}">Log Out</a></p>
+<script src="{% static 'dashboard_bar.js' %}"></script>
 {% endblock %}

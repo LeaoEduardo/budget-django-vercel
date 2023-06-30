@@ -1,6 +1,5 @@
-from datetime import datetime
 from django.forms import ModelForm, DateInput
-from .models import Transaction, Card, Budget
+from .models import Transaction, Card, Budget, Goal
 
 class CustomDateInput(DateInput):
     input_type="date"
@@ -24,4 +23,12 @@ class BudgetForm(ModelForm):
         exclude = ["user"]
         widgets = {
             'receive_date': CustomDateInput()
+        }
+
+class GoalForm(ModelForm):
+    class Meta:
+        model = Goal
+        exclude = ["user"]
+        widgets = {
+            'desired_date': CustomDateInput()
         }

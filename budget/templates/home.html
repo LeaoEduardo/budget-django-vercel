@@ -7,13 +7,36 @@
 <h2>Dashboard</h2>
 <div class="grid-container">
   <div class="grid-item">
+    <div class="scorecard">
+      <div class="metric">
+        <div class="metric-label">{{ money_left.label }}</div>
+        <div class="metric-value">{{ money_left.value }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-item">
+    <form>
+      <div class="form-group">
+        <label for="progress-bar-select">Select Goal:</label>
+        <select class="form-control" id="progress-bar-select" onchange="updateProgressBar(this.value)">
+          {% for gp in goal_percentages %}
+              <option value="{{ gp.id }}">{{ gp.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+    <div id="progress-bar-container">
+      {% for gp in goal_percentages %}
+        <div id="{{ gp.id }}" class="progress-bar">
+          <div class="progress" id="{{ gp.name }}" style="width: {{ gp.percentage }}%"></div>
+          <label for="{{ gp.name }}">{{ gp.current_value }} / {{gp.total_value}} ({{ gp.percentage|floatformat:2 }}%)</label>
+          <p>Save {{ gp.value_per_month }} to achieve goal at {{gp.desired_date}}.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="grid-item">
     <canvas id="chart1"></canvas>
-  </div>
-  <div class="grid-item">
-    <canvas id="chart2"></canvas>
-  </div>
-  <div class="grid-item">
-    <canvas id="chart3"></canvas>
   </div>
   <div class="grid-item">
     <canvas id="chart4"></canvas>
@@ -28,6 +51,6 @@
 <p><a href="{% url 'create_transaction' %}">Create transaction</a></p>
 <p><a href="{% url 'create_card' %}">Create card</a></p>
 <p><a href="{% url 'create_budget' %}">Create budget</a></p>
+<p><a href="{% url 'create_goal' %}">Create goal</a></p>
 <p><a href="{% url 'logout' %}">Log Out</a></p>
-<script src="{% static 'dashboard_bar.js' %}"></script>
 {% endblock %}

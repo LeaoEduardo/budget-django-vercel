@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import TransactionForm, CardForm, BudgetForm, GoalForm
 from .models import Transaction
 from .queries import *
+from . import colors, change_alpha
 
 # Admin
 def login(request):
@@ -64,27 +65,122 @@ def spending_by_category_and_month(month):
         sum_by_categories[categories[category]] += value
 
     sum_by_categories = dict(sum_by_categories)
+
     labels = list(sum_by_categories.keys())
     values = list(sum_by_categories.values())
 
     return labels, values
 
-def spending_by_category(chart_id: str):
-    labels, values = get_current_month_transactions()
+def current_month_spending_by_category(labels, values):
 
-    # Create a dictionary containing the data
     return {
-        'type': 'bar',
-        'x': labels,
-        'y': values,
-        'y_label': "Values",
-        'canvas_id': chart_id
+        "type": 'bar',
+        "data": {
+            "labels": labels,
+            "datasets": [{
+                "label": "Values",
+                "data": values,
+                "backgroundColor": change_alpha(colors["primary"]),
+                "borderColor": colors["primary"],
+                "borderWidth": 1
+            }]
+        },
+        "options": {
+            "plugins": {
+                "title": {
+                "display": True,
+                "text": 'Current Month Spending by Category',
+                "font": {
+                    "size": 12
+                }
+                }
+            },
+            "scales": {
+                "y": {
+                    "beginAtZero": True
+                }
+            },
+            "responsive": True,
+            "maintainAspectRatio": True
+        }
+    }
+
+def current_and_last_month_by_category(labels_current, values_current, labels_last, values_last):
+    current = dict(zip(labels_current, values_current))
+    last = dict(list(zip(labels_last, values_last)))
+
+    labels = list(set(current.keys()) | set(last.keys()))
+
+    for label in labels:
+        if label not in last:
+            last[label] = 0
+        if label not in current:
+            current[label] = 0
+
+    current = dict(sorted(current.items()))
+    last = dict(sorted(last.items()))
+
+    data = {
+        'labels': labels,
+        'datasets': [
+            {
+                'label': 'Current',
+                'data': list(current.values()),
+                'fill': True,
+                'backgroundColor': change_alpha(colors["primary"]),
+                'borderColor': colors["primary"],
+                'pointBackgroundColor': change_alpha(colors["primary"]),
+                'pointBorderColor': '#fff',
+                'pointHoverBackgroundColor': '#fff',
+                'pointHoverBorderColor': colors["primary"]
+            }, 
+            {
+                'label': 'Last',
+                'data': list(last.values()),
+                'fill': True,
+                'backgroundColor': change_alpha(colors["secondary"]),
+                'borderColor': colors["secondary"],
+                'pointBackgroundColor': change_alpha(colors["secondary"]),
+                'pointBorderColor': '#fff',
+                'pointHoverBackgroundColor': '#fff',
+                'pointHoverBorderColor': colors["secondary"]
+            }]
+    }
+    
+    return {
+        "type": 'radar',
+        "data": data,
+        "options": {
+            "elements": {
+                "line": {
+                    "borderWidth": 3
+                }
+            },
+            "plugins": {
+                "title": {
+                    "display": True,
+                    "text": 'Current Month x Last Month',
+                    "font": {
+                        "size": 12
+                    }
+                }
+            },
+        },
     }
 
 @login_required()
 def dashboard(request):
     data = {}
-    data["chart1"] = spending_by_category("chart1")
+    labels_current, values_current = spending_by_category_and_month("current")
+    labels_last, values_last = spending_by_category_and_month("last")
+    data["chart1"] = {
+        "config": current_month_spending_by_category(labels_current, values_current),
+        "canvas_id": "chart1"
+    }
+    data["chart2"] = {
+        "config": current_and_last_month_by_category(labels_current, values_current, labels_last, values_last),
+        "canvas_id": "chart2"
+    }
     
     return JsonResponse(data)
 
@@ -100,6 +196,8 @@ def money_left():
 
     return {
         'value': locale.currency(left, grouping=True),
+        'spent': locale.currency(spent, grouping=True),
+        'received': locale.currency(received, grouping=True),
         'label': 'Money left',
     }
 

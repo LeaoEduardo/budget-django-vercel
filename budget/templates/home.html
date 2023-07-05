@@ -13,6 +13,7 @@
         <div class="metric-value">{{ money_left.value }}</div>
       </div>
     </div>
+    <p>Spent: {{ money_left.spent }}. <br> Received: {{ money_left.received }}.</p>
   </div>
   <div class="grid-item">
     <form>
@@ -30,7 +31,7 @@
         <div id="{{ gp.id }}" class="progress-bar">
           <div class="progress" id="{{ gp.name }}" style="width: {{ gp.percentage }}%"></div>
           <label for="{{ gp.name }}">{{ gp.current_value }} / {{gp.total_value}} ({{ gp.percentage|floatformat:2 }}%)</label>
-          <p>Save {{ gp.value_per_month }} to achieve goal at {{gp.desired_date}}.</p>
+          <p>Save {{ gp.value_per_month }} per month to achieve goal at {{gp.desired_date}}.</p>
         </div>
       {% endfor %}
     </div>
@@ -39,13 +40,7 @@
     <canvas id="chart1"></canvas>
   </div>
   <div class="grid-item">
-    <canvas id="chart4"></canvas>
-  </div>
-  <div class="grid-item">
-    <canvas id="chart5"></canvas>
-  </div>
-  <div class="grid-item">
-    <canvas id="chart6"></canvas>
+    <canvas id="chart2"></canvas>
   </div>
 </div>
 <p><a href="{% url 'create_transaction' %}">Create transaction</a></p>
